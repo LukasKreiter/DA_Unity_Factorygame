@@ -3,55 +3,63 @@ using UnityEngine;
 
 public class NoiseSystem : MonoBehaviour
 {
-    [Header("Noise A")]
-    public int seedA = 1;
-    public float freqA = 3f;
-
-    [Header("Noise B")]
-    public int seedB = 2;
-    public float freqB = 6f;
-
-    [Header("Blend")]
-    public int blendMode = 0;
-
     [Header("Output")]
     public int resolution = 256;
     public Renderer targetRenderer;
 
-    Texture2D texA;
-    Texture2D texB;
-    Texture2D result;
-    bool generated = false;
+    private Texture2D result;
+    private Node_Blueprint outputNode;
 
+    void OnValidate()
+    {
+        BuildGraph();
+        Generate();
+    }
 
     void Start()
     {
+        BuildGraph();
         Generate();
+    }
+
+    void BuildGraph()
+    {
+
+        var perlin1 = new PerlinNoise(1, 10f)
+        {
+            useFractal = false,
+            octaves = 1,
+            gain = 1f
+        };
+
+        var perlin2 = new PerlinNoise(1, 6f)
+        {
+            useFractal = true,
+            octaves = 6,
+            gain = 0.5f
+        };
+
+        outputNode = new CombineNode(perlin1, perlin2, CombineMode.Add);
+        //outputNode = perlin1;
+
+        outputNode.Init();
     }
 
     public void Generate()
     {
-        // Create nodes
-        var nodeA = new PerlinNoise(seedA, freqA);
-        var nodeB = new PerlinNoise(seedB, freqB);
+        if (outputNode == null)
+        {
+            Debug.LogWarning("No output node assigned.");
+            return;
+        }
 
-        // Build textures
-        texA = NoiseTextureBuilder.Generate(nodeA, resolution);
-        texB = NoiseTextureBuilder.Generate(nodeB, resolution);
+        result = NoiseTextureBuilder.Generate(outputNode, resolution);
 
-        // Blend
-        result = NoiseBlend.Blend(texA, texB, blendMode);
-
-        // Preview
         if (targetRenderer != null)
         {
-            Material mat = targetRenderer.material;
-
-            mat.mainTexture = result;
+            Material mat = targetRenderer.sharedMaterial;
             mat.SetTexture("_BaseColorMap", result);
             mat.SetTexture("_UnlitColorMap", result);
-
-            Debug.Log("Renderer material assigned: " + mat.name);
         }
     }
 }
