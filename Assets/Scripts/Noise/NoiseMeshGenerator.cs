@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Builds a terrain-style mesh from the final output node of your noise graph.
-/// Attach to a GameObject with MeshFilter + MeshRenderer.
-/// </summary>
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 [ExecuteAlways]
 public class NoiseMeshGenerator : MonoBehaviour
@@ -33,27 +29,20 @@ public class NoiseMeshGenerator : MonoBehaviour
 
     void OnEnable()
     {
-        noiseSystem = GetComponent<NoiseSystem>();
-        meshFilter = GetComponent<MeshFilter>();
+        if (noiseSystem == null)
+            noiseSystem = GetComponent<NoiseSystem>();
+
+        EnsureMesh();
 
         if (noiseSystem != null)
         {
             noiseSystem.OnGraphBuilt += HandleGraphBuilt;
 
-            // if already built
             outputNode = noiseSystem.GetOutputNode();
 
             if (outputNode != null)
                 Generate();
         }
-
-        if (mesh == null) 
-        { 
-            mesh = new Mesh();
-            mesh.name = "Noise Mesh"; 
-        }
-
-        meshFilter.sharedMesh = mesh;
     }
 
     void OnDisable()
@@ -64,13 +53,21 @@ public class NoiseMeshGenerator : MonoBehaviour
 
     void OnValidate()
     {
-        if (!autoUpdate) return;
+        if (!autoUpdate)
+            return;
 
-        if (noiseSystem == null) return;
+        EnsureMesh();
+
+        if (noiseSystem == null)
+            noiseSystem = GetComponent<NoiseSystem>();
+
+        if (noiseSystem == null)
+            return;
 
         outputNode = noiseSystem.GetOutputNode();
 
-        if (outputNode == null) return;
+        if (outputNode == null)
+            return;
 
         Generate();
     }
@@ -80,8 +77,9 @@ public class NoiseMeshGenerator : MonoBehaviour
         if (outputNode == null)
             return;
 
-        if (resolution < 2)
-            resolution = 2;
+        EnsureMesh();
+
+        resolution = Mathf.Max(2, resolution);
 
         outputNode.Init();
 
@@ -165,4 +163,19 @@ public class NoiseMeshGenerator : MonoBehaviour
         outputNode = node;
         Generate();
     }
+
+    void EnsureMesh()
+{
+    if (meshFilter == null)
+        meshFilter = GetComponent<MeshFilter>();
+
+    if (mesh == null)
+    {
+        mesh = new Mesh();
+        mesh.name = "Noise Mesh";
+    }
+
+    if (meshFilter.sharedMesh != mesh)
+        meshFilter.sharedMesh = mesh;
+}
 }
