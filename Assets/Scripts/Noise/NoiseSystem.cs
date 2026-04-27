@@ -44,7 +44,7 @@ public class NoiseSystem : MonoBehaviour
 
     void BuildGraph()
     {
-        var baseNoise = new PerlinNoise(1, 3f) // base shape is created 
+        var baseNoise = new PerlinNoise(3, 3f) // base shape is created 
         {
             useFractal = false
         };
@@ -66,15 +66,53 @@ public class NoiseSystem : MonoBehaviour
 
         var mountain = new CombineNode(mountainShape, maskedDetail, CombineMode.Add); // apply detail to mountain
 
-        if (useErosion && erosionShader != null)
-            outputNode =
-                new ErosionNode(
-                    mountain,
-                    erosionShader, 
-                    erosionResolution,
-                    erosionSettings);
-        else
-            outputNode = mountain;
+        var warpedMountain = new SwirlNode(
+            mountain,
+            .6f,
+            1.5f
+        );
+
+        //if (useErosion && erosionShader != null)
+            //outputNode =
+            //    new ErosionNode(
+            //        warpedMountain,
+            //        erosionShader, 
+            //        erosionResolution,
+            //        erosionSettings);
+        //else
+            //outputNode = warpedMountain;
+
+        //var island = new IslandNode(0.45f, coastNoise);
+
+        //var shaped = new CurveNode(island, 5f);
+
+        //var terrace = new TerraceNode(warpedMountain, 2, 0.2f);
+
+        var macro = new PerlinNoise(2, 9f)
+        {
+            useFractal = true,
+            octaves = 3
+        };
+
+        var coast = new PerlinNoise(7, 8f)
+        {
+            useFractal = true,
+            octaves = 5
+        };
+
+        var warp = new PerlinNoise(9, 8f)
+        {
+            useFractal = true,
+            octaves = 3
+        };
+
+        outputNode =
+            new IslandNode(
+                0.35f,
+                macro,
+                coast,
+                warp
+            );
 
         outputNode.Init();
     }
