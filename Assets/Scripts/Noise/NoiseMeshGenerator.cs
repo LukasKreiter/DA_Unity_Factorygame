@@ -154,12 +154,10 @@ public class NoiseMeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         mesh.RecalculateTangents();
-        Debug.Log("Mesh built: " + vertices.Length + " vertices");
     }
 
     void HandleGraphBuilt(Node_Blueprint node)
     {
-        Debug.Log("HandleGraphBuilt");
         outputNode = node;
         Generate();
     }
