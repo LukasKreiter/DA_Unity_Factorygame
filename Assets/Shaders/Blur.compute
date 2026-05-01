@@ -1,0 +1,37 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> result;
+StructuredBuffer<float> input;
+
+int resolution;
+int radius;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int x = id.x;
+    int y = id.y;
+
+    if (x >= resolution || y >= resolution)
+        return;
+
+    float sum = 0;
+    int count = 0;
+
+    for (int oy = -radius; oy <= radius; oy++)
+    {
+        for (int ox = -radius; ox <= radius; ox++)
+        {
+            int sx = clamp(x + ox, 0, resolution - 1);
+            int sy = clamp(y + oy, 0, resolution - 1);
+
+            int index = sy * resolution + sx;
+
+            sum += input[index];
+            count++;
+        }
+    }
+
+    result[y * resolution + x] = sum / count;
+}

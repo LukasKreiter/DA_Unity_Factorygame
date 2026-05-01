@@ -17,6 +17,9 @@ public class NoiseSystem : MonoBehaviour
 
     public ErosionSettings erosionSettings =
         new ErosionSettings();
+    
+    [Header("Blur")]
+    public ComputeShader blurShader;
 
     public event Action<Node_Blueprint> OnGraphBuilt;
 
@@ -72,21 +75,12 @@ public class NoiseSystem : MonoBehaviour
             1.5f
         );
 
-        //if (useErosion && erosionShader != null)
-            //outputNode =
-            //    new ErosionNode(
-            //        warpedMountain,
-            //        erosionShader, 
-            //        erosionResolution,
-            //        erosionSettings);
-        //else
-            //outputNode = warpedMountain;
-
-        //var island = new IslandNode(0.45f, coastNoise);
-
-        //var shaped = new CurveNode(island, 5f);
-
-        //var terrace = new TerraceNode(warpedMountain, 2, 0.2f);
+        var transformedMountain = new TransformNode(warpedMountain)
+        {
+            position = new Vector2(0f, -0.25f),
+            scale = new Vector2(0.8f, 0.8f),
+            heightScale = 0.6f,
+        };
 
         var macro = new PerlinNoise(2, 9f)
         {
@@ -106,13 +100,29 @@ public class NoiseSystem : MonoBehaviour
             octaves = 3
         };
 
-        outputNode =
+        var island =
             new IslandNode(
-                0.35f,
+                0.45f,
+                .15f,
                 macro,
                 coast,
                 warp
             );
+
+        var blur = new BlurNode(island, blurShader, 512)
+        {
+            radius = 6
+        };
+
+        var mountainIsland = new CombineNode(blur, transformedMountain, CombineMode.Add);
+
+        outputNode =
+                new ErosionNode(
+                    mountainIsland,
+                    erosionShader, 
+                    erosionResolution,
+                    erosionSettings);
+
 
         outputNode.Init();
     }

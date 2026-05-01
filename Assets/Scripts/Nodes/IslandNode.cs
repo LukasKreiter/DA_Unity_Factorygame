@@ -8,6 +8,7 @@ public class IslandNode : Node_Blueprint
 
     public float macroStrength = 0.22f;
     public float coastStrength = 0.16f;
+    public float islandHeight = 1;
 
     public Node_Blueprint macroNoise;
     public Node_Blueprint coastNoise;
@@ -17,11 +18,13 @@ public class IslandNode : Node_Blueprint
 
     public IslandNode(
         float radius,
+        float islandHeight,
         Node_Blueprint macroNoise,
         Node_Blueprint coastNoise,
         Node_Blueprint warpNoise)
     {
         this.radius = radius;
+        this.islandHeight = islandHeight;
         this.macroNoise = macroNoise;
         this.coastNoise = coastNoise;
         this.warpNoise = warpNoise;
@@ -76,6 +79,6 @@ public class IslandNode : Node_Blueprint
 
         field += coast;
 
-        return field > threshold ? 1f : 0f;
+        return field > threshold ? islandHeight : 0f;
     }
 }
