@@ -96,7 +96,6 @@ public class TiledWorldGenerator : MonoBehaviour
 
     TerrainTile BuildTile(int tileX, int tileY, float tileWorldSize, Node_Blueprint node)
     {
-        Debug.Log("initializing node: "+node);
 
         TerrainTile tile = new TerrainTile
         {
@@ -174,7 +173,6 @@ public class TiledWorldGenerator : MonoBehaviour
         mesh.RecalculateBounds();  // culling
 
         tile.mesh = mesh;
-        Debug.Log("returning tile: "+tile);
         return tile;
     }
 
