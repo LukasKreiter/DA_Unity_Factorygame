@@ -1,20 +1,30 @@
-public class ItemData
+using UnityEngine;
+public class ItemData : ScriptableObject
 {
     int itemID;
-    ItemType itemType;
+    string name;
+    string description;
     
-    public ItemData(ItemType itemType)
+    public ItemData(int id, string name, string description)
     {
-        this.itemType = itemType;
+        this.name = name;
+        this.description = description;
     }
     
-    public ItemType getItemType()
+    public string getName()
     {
-        return this.itemType;
+        return this.name;
     }
 
-    public void setItemType(ItemType type)
+    public string getDescription()
     {
-        this.itemType = type;
+        return this.description;
     }
+
+    public int getID()
+    {
+        return this.itemID;
+    }
+
+
 }
