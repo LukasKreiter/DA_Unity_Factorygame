@@ -1,0 +1,66 @@
+public enum ItemType 
+{
+    IRON_ORE,
+    IRON_INGOT,
+    IRON_GEAR,
+    SCREWS,
+    IRON_PLATES,
+
+
+    STEEL_INGOT,
+    REINFORCED_STEEL_PLATE,
+
+
+    COPPER_ORE,
+    COPPER_INGOT,
+    COPPER_WIRE,
+    CURCUIT_BOARD,
+
+
+    STONE,
+    CONCRETE,
+
+    
+    WOOD,
+
+
+    WATER,
+
+
+    CRUDE_OIL,
+    LIGHT_OIL,
+    HEAVY_OIL,
+    PLASTIC,
+    RUBBER,
+    FUEL,
+    BATTERY,
+
+
+    COAL,
+
+
+    SULFUR,
+    SULFURIC_ACID,
+
+    
+    URANIUM_ORE,
+    URANIUM_FUEL_ROD,
+
+
+    WATER_EXTRACTOR,
+    MINER,
+    RESEARCH_LAB,
+    REFINERY,
+    SMELTER,
+    ASSEMBLER,
+    OIL_EXTRACTOR,
+    CONVEYOR_BELT,
+    POWER_POLE,
+    WIND_TURBINE,
+    SOLAR_POWERPLANT,
+    INCINERATION_POWERPLANT,
+    NUCLEAR_POWERPLANT,
+    
+    TRACTOR,
+    
+}
