@@ -47,74 +47,106 @@ public class NoiseSystem : MonoBehaviour
 
     void BuildGraph()
     {
-        var baseNoise = new PerlinNoise(3, 3f) // base shape is created 
+        // ------------------------------------------------------- primitve noises 
+
+        // mountain noise
+        var mountain_ridged = new RidgedNoiseNode(5, 3f)
         {
-            useFractal = false
-        };
-
-        var cone = new ConeNode(0.35f); // cone shape for masking
-
-        var maskedNoise = new CombineNode(baseNoise, cone, CombineMode.Multiply); // mask with multiply
-
-        var mountainShape = new CombineNode(cone, maskedNoise, CombineMode.Add); // lift maskedNoise with cone shape to make it more mountain-like
-
-        var mountainDetail = new PerlinNoise(4, 4f) // fractal noise for mountain detail
-        {
-            useFractal = true,
             octaves = 5,
-            gain = 0.5f,
+            lacunarity = 2f,
+            gain = 0.6f
         };
-
-        var maskedDetail = new CombineNode(mountainDetail, cone, CombineMode.Multiply); // mask the noise to keep surrounding terrain flat
-
-        var mountain = new CombineNode(mountainShape, maskedDetail, CombineMode.Add); // apply detail to mountain
-
-        var warpedMountain = new SwirlNode(
-            mountain,
-            .6f,
-            1.5f
-        );
-
-        var transformedMountain = new TransformNode(warpedMountain)
-        {
-            position = new Vector2(0f, -0.25f),
-            scale = new Vector2(0.8f, 0.8f),
-            heightScale = 0.6f,
-        };
-
-        var macro = new PerlinNoise(2, 9f)
+        var mountain_warp = new PerlinNoise(8, 6f)
         {
             useFractal = true,
             octaves = 3
         };
-
-        var coast = new PerlinNoise(7, 8f)
+        var mountain_macro = new PerlinNoise(2, 1.5f)
+        {
+            useFractal = true,
+            octaves = 2
+        };
+        
+        // island noise
+        var island_macro = new PerlinNoise(2, 9f)
+        {
+            useFractal = true,
+            octaves = 3
+        };
+        var island_coast = new PerlinNoise(7, 8f)
         {
             useFractal = true,
             octaves = 5
         };
-
-        var warp = new PerlinNoise(9, 8f)
+        var island_warp = new PerlinNoise(9, 8f)
         {
             useFractal = true,
             octaves = 3
         };
 
-        var island =
-            new IslandNode(
-                0.45f,
-                .15f,
-                macro,
-                coast,
-                warp
-            );
+        // ------------------------------------------------------- mountain generation
 
-        var blur = new BlurNode(island, blurShader, 512)
+        // unmasked mountain range
+        var mountainRange = new MountainNode(mountain_ridged, mountain_warp, mountain_macro)
+        {
+            warpStrength = 0.1f,
+            height = 1f
+        };
+
+        // falloff mask with edge noise
+        var falloff = new WarpedFalloffNode
+        {
+            radius = 0.5f,
+            falloffPower = 1.4f,
+            warp = island_macro,    // reuse low freq noise
+            edgeNoise = island_warp,
+            edgeStrength = 1f
+        };
+
+        // mask with falloff
+        var maskedMountains = new CombineNode(
+            mountainRange,
+            falloff,
+            CombineMode.Multiply
+        );
+
+        // warp edges slightly
+        var warpedMountain = new SwirlNode(
+            maskedMountains,
+            .6f,
+            1.5f
+        );
+
+        // move mountain to island edge
+        var transformedMountain = new TransformNode(warpedMountain)
+        {
+            position = new Vector2(0f, 0f),
+            scale = new Vector2(2, 2),
+            heightScale = 1.5f,
+        };
+
+        // ------------------------------------------------------- island generation
+
+        // generate island
+        var island =
+        new IslandNode(
+            0.45f,
+            .15f,
+            island_macro,
+            island_coast,
+            island_warp
+        );
+
+        // blur island mask for slopes
+        var blurredIsland = new BlurNode(island, blurShader, 512)
         {
             radius = 6
         };
 
-        var mountainIsland = new CombineNode(blur, transformedMountain, CombineMode.Add);
+        // ------------------------------------------------------- final output
+        
+        // combine island with mountain
+        var mountainIsland = new CombineNode(blurredIsland, transformedMountain, CombineMode.Add);
 
         outputNode =
                 new ErosionNode(
@@ -123,8 +155,10 @@ public class NoiseSystem : MonoBehaviour
                     erosionResolution,
                     erosionSettings);
 
+        //outputNode = mountains;
 
         outputNode.Init();
+
     }
 
     public void Generate()

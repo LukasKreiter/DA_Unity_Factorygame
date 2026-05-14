@@ -45,11 +45,13 @@ public class BlurNode : Node_Blueprint
 
     public override float Evaluate(float x, float y)
     {
+
         float fx = x * (resolution - 1);
         float fy = y * (resolution - 1);
 
-        int x0 = (int)fx;
-        int y0 = (int)fy;
+        int x0 = Mathf.Clamp((int)fx, 0, resolution - 1);
+        int y0 = Mathf.Clamp((int)fy, 0, resolution - 1);
+
         int x1 = Mathf.Min(x0 + 1, resolution - 1);
         int y1 = Mathf.Min(y0 + 1, resolution - 1);
 
