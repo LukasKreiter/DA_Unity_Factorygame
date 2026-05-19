@@ -56,12 +56,12 @@ public class NoiseSystem : MonoBehaviour
             lacunarity = 2f,
             gain = 0.6f
         };
-        var mountain_warp = new PerlinNoise(8, 6f)
+        var mountain_warp = new PerlinNoise(8, 9f)
         {
             useFractal = true,
             octaves = 3
         };
-        var mountain_macro = new PerlinNoise(2, 1.5f)
+        var mountain_macro = new PerlinNoise(2, 1.4f)
         {
             useFractal = true,
             octaves = 2
@@ -84,6 +84,12 @@ public class NoiseSystem : MonoBehaviour
             octaves = 3
         };
 
+        var mountainDetail = new PerlinNoise(8, 12f)
+        {
+            useFractal = true,
+            octaves = 3
+        };
+
         // ------------------------------------------------------- mountain generation
 
         // unmasked mountain range
@@ -96,23 +102,34 @@ public class NoiseSystem : MonoBehaviour
         // falloff mask with edge noise
         var falloff = new WarpedFalloffNode
         {
-            radius = 0.5f,
-            falloffPower = 1.4f,
-            warp = island_macro,    // reuse low freq noise
-            edgeNoise = island_warp,
-            edgeStrength = 1f
+            radius = 0.4f,
+            falloffPower = .8f,  
+            edgeNoise = mountain_warp, // reuse low freq noise
+            edgeStrength = .8f
         };
 
-        // mask with falloff
+        // mask mountain with falloff
         var maskedMountains = new CombineNode(
             mountainRange,
             falloff,
             CombineMode.Multiply
         );
 
+        var maskedDetail = new CombineNode(
+        mountainDetail,
+        falloff,
+        CombineMode.Multiply
+        );
+
+        var detailedMountain = new CombineNode(
+            maskedMountains,
+            maskedDetail,
+            CombineMode.Add
+        );
+
         // warp edges slightly
         var warpedMountain = new SwirlNode(
-            maskedMountains,
+            detailedMountain,
             .6f,
             1.5f
         );
@@ -149,13 +166,14 @@ public class NoiseSystem : MonoBehaviour
         var mountainIsland = new CombineNode(blurredIsland, transformedMountain, CombineMode.Add);
 
         outputNode =
-                new ErosionNode(
-                    mountainIsland,
-                    erosionShader, 
-                    erosionResolution,
-                    erosionSettings);
-
-        //outputNode = mountains;
+        new ErosionNode(
+            transformedMountain,
+            erosionShader,
+            erosionResolution,
+            erosionSettings
+        );
+        
+        //outputNode = transformedMountain;
 
         outputNode.Init();
 
