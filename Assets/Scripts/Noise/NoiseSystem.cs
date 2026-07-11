@@ -24,7 +24,11 @@ public class NoiseSystem : MonoBehaviour
     public event Action<Node_Blueprint> OnGraphBuilt;
 
     Texture2D result;
+    Texture2D slopeMaskTex;
+    Texture2D heightMaskTex;
     Node_Blueprint outputNode;
+    Node_Blueprint slopeMask;
+    Node_Blueprint heightMask;
 
     void Start()
     {
@@ -87,7 +91,7 @@ public class NoiseSystem : MonoBehaviour
         var mountainDetail = new PerlinNoise(8, 12f)
         {
             useFractal = true,
-            octaves = 3
+            octaves = 10
         };
 
         // ------------------------------------------------------- mountain generation
@@ -159,22 +163,31 @@ public class NoiseSystem : MonoBehaviour
         {
             radius = 6
         };
-
+        
         // ------------------------------------------------------- final output
         
         // combine island with mountain
         var mountainIsland = new CombineNode(blurredIsland, transformedMountain, CombineMode.Add);
-
         outputNode =
         new ErosionNode(
-            transformedMountain,
+            mountainIsland,
             erosionShader,
             erosionResolution,
             erosionSettings
         );
-        
-        //outputNode = transformedMountain;
 
+        slopeMask = new MaskNode(outputNode, MaskNode.MaskType.Slope)
+        {
+            minSlope = 0f,
+            maxSlope = .5f
+        };
+
+        heightMask = new MaskNode(outputNode, MaskNode.MaskType.Height)
+        {
+            minHeight = 0.15f,
+            maxHeight = 0.75f
+        };
+        
         outputNode.Init();
 
     }
@@ -189,11 +202,14 @@ public class NoiseSystem : MonoBehaviour
 
         result = NoiseTextureBuilder.Generate(outputNode, resolution);
 
+        slopeMaskTex = NoiseTextureBuilder.Generate(slopeMask, resolution);
+        heightMaskTex = NoiseTextureBuilder.Generate(heightMask, resolution);
+
         if (targetRenderer != null)
         {
             Material mat = targetRenderer.sharedMaterial;
-            mat.SetTexture("_BaseColorMap", result);
-            mat.SetTexture("_UnlitColorMap", result);
+            mat.SetTexture("_BaseColorMap", heightMaskTex);
+            mat.SetTexture("_UnlitColorMap", heightMaskTex);
         }
     }
 
