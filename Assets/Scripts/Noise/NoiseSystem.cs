@@ -217,7 +217,7 @@ public class NoiseSystem : MonoBehaviour
         if (targetRenderer != null)
         {
             Material mat = targetRenderer.material;     // changed to material because sharedMaterial isnt suitable for viewport Shadergraph testing
-            Texture2D sampleTexture = heightMaskTex;    // initialize preview noise texture
+            Texture2D sampleTexture = slopeMaskTex;    // initialize preview noise texture
             //mat.SetTexture("_BaseColorMap", flowMaskTex);
             //mat.SetTexture("_UnlitColorMap", flowMaskTex);
             mat.SetTexture("_NoiseTexture", sampleTexture);
