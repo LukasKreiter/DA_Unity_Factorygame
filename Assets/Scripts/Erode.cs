@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class Erode
 {
-    public static float[] Run(
+    public static ErosionResult Run(
         ComputeShader shader,
         float[] sourceMap,
         int resolution,
@@ -11,19 +11,21 @@ public static class Erode
         if (shader == null)
         {
             Debug.LogError("Missing erosion compute shader.");
-            return sourceMap;
+            return new ErosionResult(sourceMap, new float[sourceMap.Length]);
         }
 
         if (sourceMap == null || sourceMap.Length == 0)
-            return sourceMap;
+        {
+            return new ErosionResult(sourceMap, new float[0]);
+        }
 
         int kernel = shader.FindKernel("CSMain");
 
         int paddedSize = resolution + settings.brushRadius * 2;
         int totalSize = paddedSize * paddedSize;
 
-        // Pad source map with border
         float[] map = new float[totalSize];
+        float[] flowMap = new float[totalSize];
 
         for (int y = 0; y < resolution; y++)
         {
@@ -39,10 +41,8 @@ public static class Erode
             }
         }
 
-        // Brush creation
         var brush = BuildBrush(settings.brushRadius, paddedSize);
 
-        // Random spawn indices
         int[] randomIndices = new int[settings.iterations];
 
         for (int i = 0; i < settings.iterations; i++)
@@ -58,59 +58,84 @@ public static class Erode
             randomIndices[i] = ry * paddedSize + rx;
         }
 
-        // Buffers
-        ComputeBuffer mapBuffer =
-            new ComputeBuffer(map.Length, sizeof(float));
+        ComputeBuffer mapBuffer = null;
+        ComputeBuffer randomBuffer = null;
+        ComputeBuffer brushIndexBuffer = null;
+        ComputeBuffer brushWeightBuffer = null;
+        ComputeBuffer flowBuffer = null;
 
-        ComputeBuffer randomBuffer =
-            new ComputeBuffer(randomIndices.Length, sizeof(int));
+        try
+        {
+            mapBuffer = new ComputeBuffer(map.Length, sizeof(float));
+            randomBuffer = new ComputeBuffer(randomIndices.Length, sizeof(int));
+            brushIndexBuffer = new ComputeBuffer(brush.indices.Length, sizeof(int));
+            brushWeightBuffer = new ComputeBuffer(brush.weights.Length, sizeof(float));
+            flowBuffer = new ComputeBuffer(flowMap.Length, sizeof(float));
 
-        ComputeBuffer brushIndexBuffer =
-            new ComputeBuffer(brush.indices.Length, sizeof(int));
+            mapBuffer.SetData(map);
+            randomBuffer.SetData(randomIndices);
+            brushIndexBuffer.SetData(brush.indices);
+            brushWeightBuffer.SetData(brush.weights);
+            flowBuffer.SetData(flowMap);
 
-        ComputeBuffer brushWeightBuffer =
-            new ComputeBuffer(brush.weights.Length, sizeof(float));
+            shader.SetBuffer(kernel, "map", mapBuffer);
+            shader.SetBuffer(kernel, "randomIndices", randomBuffer);
+            shader.SetBuffer(kernel, "brushIndices", brushIndexBuffer);
+            shader.SetBuffer(kernel, "brushWeights", brushWeightBuffer);
+            shader.SetBuffer(kernel, "flowMap", flowBuffer);
 
-        mapBuffer.SetData(map);
-        randomBuffer.SetData(randomIndices);
-        brushIndexBuffer.SetData(brush.indices);
-        brushWeightBuffer.SetData(brush.weights);
+            shader.SetInt("mapSize", paddedSize);
+            shader.SetInt("brushLength", brush.indices.Length);
+            shader.SetInt("borderSize", settings.brushRadius);
 
-        shader.SetBuffer(kernel, "map", mapBuffer);
-        shader.SetBuffer(kernel, "randomIndices", randomBuffer);
-        shader.SetBuffer(kernel, "brushIndices", brushIndexBuffer);
-        shader.SetBuffer(kernel, "brushWeights", brushWeightBuffer);
+            shader.SetInt("maxLifetime", settings.maxLifetime);
 
-        // Parameters
-        shader.SetInt("mapSize", paddedSize);
-        shader.SetInt("brushLength", brush.indices.Length);
-        shader.SetInt("borderSize", settings.brushRadius);
+            shader.SetFloat("inertia", settings.inertia);
+            shader.SetFloat("sedimentCapacityFactor", settings.sedimentCapacityFactor);
+            shader.SetFloat("minSedimentCapacity", settings.minSedimentCapacity);
+            shader.SetFloat("depositSpeed", settings.depositSpeed);
+            shader.SetFloat("erodeSpeed", settings.erodeSpeed);
+            shader.SetFloat("evaporateSpeed", settings.evaporateSpeed);
+            shader.SetFloat("gravity", settings.gravity);
+            shader.SetFloat("startSpeed", settings.startSpeed);
+            shader.SetFloat("startWater", settings.startWater);
+            shader.SetFloat("flowStrength", settings.flowStrength);
+            shader.SetFloat("flowExponent", settings.flowExponent);
 
-        shader.SetInt("maxLifetime", settings.maxLifetime);
+            int groups = Mathf.CeilToInt(settings.iterations / 1024f);
 
-        shader.SetFloat("inertia", settings.inertia);
-        shader.SetFloat("sedimentCapacityFactor", settings.sedimentCapacityFactor);
-        shader.SetFloat("minSedimentCapacity", settings.minSedimentCapacity);
-        shader.SetFloat("depositSpeed", settings.depositSpeed);
-        shader.SetFloat("erodeSpeed", settings.erodeSpeed);
-        shader.SetFloat("evaporateSpeed", settings.evaporateSpeed);
-        shader.SetFloat("gravity", settings.gravity);
-        shader.SetFloat("startSpeed", settings.startSpeed);
-        shader.SetFloat("startWater", settings.startWater);
+            shader.Dispatch(kernel, groups, 1, 1);
 
-        // Dispatch
-        int groups = Mathf.CeilToInt(settings.iterations / 1024f);
-        shader.Dispatch(kernel, groups, 1, 1);
+            mapBuffer.GetData(map);
+            flowBuffer.GetData(flowMap);
+        }
+        finally
+        {
+            mapBuffer?.Release();
+            randomBuffer?.Release();
+            brushIndexBuffer?.Release();
+            brushWeightBuffer?.Release();
+            flowBuffer?.Release();
+        }
 
-        mapBuffer.GetData(map);
+        float maxFlow = 0f;
 
-        mapBuffer.Release();
-        randomBuffer.Release();
-        brushIndexBuffer.Release();
-        brushWeightBuffer.Release();
+        for (int i = 0; i < flowMap.Length; i++)
+        {
+            if (flowMap[i] > maxFlow)
+                maxFlow = flowMap[i];
+        }
 
-        // Unpad result
+        if (maxFlow > 0f)
+        {
+            for (int i = 0; i < flowMap.Length; i++)
+            {
+                flowMap[i] /= maxFlow;
+            }
+        }
+
         float[] finalMap = new float[resolution * resolution];
+        float[] finalFlow = new float[resolution * resolution];
 
         for (int y = 0; y < resolution; y++)
         {
@@ -123,13 +148,16 @@ public static class Erode
                 int dst = y * resolution + x;
 
                 finalMap[dst] = map[src];
+                finalFlow[dst] = flowMap[src];
             }
         }
 
-        return finalMap;
+        return new ErosionResult(
+            finalMap,
+            finalFlow
+        );
     }
 
-    // Brush builder
     static BrushData BuildBrush(int radius, int mapSize)
     {
         System.Collections.Generic.List<int> ids =

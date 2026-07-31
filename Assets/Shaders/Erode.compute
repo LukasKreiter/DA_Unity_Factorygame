@@ -1,9 +1,10 @@
 #pragma kernel CSMain
 
-RWStructuredBuffer<float> map;
 StructuredBuffer<int> randomIndices;
 StructuredBuffer<int> brushIndices;
 StructuredBuffer<float> brushWeights;
+RWStructuredBuffer<float> map;
+RWStructuredBuffer<float> flowMap;
 
 int mapSize;
 int brushLength;
@@ -15,6 +16,9 @@ float sedimentCapacityFactor;
 float minSedimentCapacity;
 float depositSpeed;
 float erodeSpeed;
+
+float flowStrength;
+float flowExponent;
 
 float evaporateSpeed;
 float gravity;
@@ -88,6 +92,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         // Find the droplet's new height and calculate the deltaHeight
         float newHeight = CalculateHeightAndGradient (posX, posY).z;
         float deltaHeight = newHeight - heightAndGradient.z;
+        float flow = saturate(-deltaHeight * flowStrength);
+        // Contribute flow to flow map
+        flowMap[dropletIndex] += flow;
 
         // Calculate the droplet's sediment capacity (higher when moving fast down a slope and contains lots of water)
         float sedimentCapacity = max(-deltaHeight * speed * water * sedimentCapacityFactor, minSedimentCapacity);

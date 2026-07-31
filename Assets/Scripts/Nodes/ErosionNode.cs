@@ -10,7 +10,8 @@ public class ErosionNode : Node_Blueprint
 
     public int bakeResolution = 256;
 
-    float[] cachedMap;
+    float[] cachedHeightMap;
+    float[] cachedFlowMap;
     bool built;
 
     public ErosionNode(
@@ -50,6 +51,7 @@ public class ErosionNode : Node_Blueprint
         float[] map =
             new float[bakeResolution * bakeResolution];
 
+        // Bake input node into heightmap
         for (int y = 0; y < bakeResolution; y++)
         {
             for (int x = 0; x < bakeResolution; x++)
@@ -65,21 +67,47 @@ public class ErosionNode : Node_Blueprint
             }
         }
 
-        cachedMap = Erode.Run(
+        ErosionResult erosionResult = Erode.Run(
             erosionShader,
             map,
             bakeResolution,
             settings
         );
 
+        cachedHeightMap = erosionResult.heightMap;
+        cachedFlowMap = erosionResult.flowMap;
+
         built = true;
     }
 
     public override float Evaluate(float x, float y)
     {
-        if (!built || cachedMap == null)
+        if (!built || cachedHeightMap == null)
             return 0f;
 
+
+        return SampleMap(
+            cachedHeightMap,
+            x,
+            y
+        );
+    }
+
+    public float EvaluateFlow(float x, float y)
+    {
+        if (!built || cachedFlowMap == null)
+            return 0f;
+
+
+        return SampleMap(
+            cachedFlowMap,
+            x,
+            y
+        );
+    }
+
+    float SampleMap(float[] map, float x, float y)
+    {
         x = Mathf.Clamp01(x);
         y = Mathf.Clamp01(y);
 
@@ -95,14 +123,16 @@ public class ErosionNode : Node_Blueprint
         float tx = px - ix;
         float ty = py - iy;
 
-        float a = cachedMap[iy * bakeResolution + ix];
-        float b = cachedMap[iy * bakeResolution + ix1];
-        float c = cachedMap[iy1 * bakeResolution + ix];
-        float d = cachedMap[iy1 * bakeResolution + ix1];
+        float a = map[iy * bakeResolution + ix];
+        float b = map[iy * bakeResolution + ix1];
+        float c = map[iy1 * bakeResolution + ix];
+        float d = map[iy1 * bakeResolution + ix1];
 
         float ab = Mathf.Lerp(a, b, tx);
         float cd = Mathf.Lerp(c, d, tx);
 
         return Mathf.Lerp(ab, cd, ty);
     }
+
+
 }

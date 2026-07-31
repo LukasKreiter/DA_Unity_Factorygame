@@ -26,9 +26,11 @@ public class NoiseSystem : MonoBehaviour
     Texture2D result;
     Texture2D slopeMaskTex;
     Texture2D heightMaskTex;
+    Texture2D flowMaskTex;
     Node_Blueprint outputNode;
     Node_Blueprint slopeMask;
     Node_Blueprint heightMask;
+    Node_Blueprint flowMask;
 
     void Start()
     {
@@ -168,6 +170,7 @@ public class NoiseSystem : MonoBehaviour
         
         // combine island with mountain
         var mountainIsland = new CombineNode(blurredIsland, transformedMountain, CombineMode.Add);
+
         outputNode =
         new ErosionNode(
             mountainIsland,
@@ -188,8 +191,13 @@ public class NoiseSystem : MonoBehaviour
             maxHeight = 0.75f
         };
         
+        flowMask = new MaskNode(outputNode, MaskNode.MaskType.Flow)
+        {
+            minFlow = 0.1f,
+            maxFlow = 0.5f
+        };
+        
         outputNode.Init();
-
     }
 
     public void Generate()
@@ -204,12 +212,16 @@ public class NoiseSystem : MonoBehaviour
 
         slopeMaskTex = NoiseTextureBuilder.Generate(slopeMask, resolution);
         heightMaskTex = NoiseTextureBuilder.Generate(heightMask, resolution);
+        flowMaskTex = NoiseTextureBuilder.Generate(flowMask, erosionResolution);
 
         if (targetRenderer != null)
         {
-            Material mat = targetRenderer.sharedMaterial;
-            mat.SetTexture("_BaseColorMap", heightMaskTex);
-            mat.SetTexture("_UnlitColorMap", heightMaskTex);
+            Material mat = targetRenderer.material;     // changed to material because sharedMaterial isnt suitable for viewport Shadergraph testing
+            Texture2D sampleTexture = heightMaskTex;    // initialize preview noise texture
+            //mat.SetTexture("_BaseColorMap", flowMaskTex);
+            //mat.SetTexture("_UnlitColorMap", flowMaskTex);
+            mat.SetTexture("_NoiseTexture", sampleTexture);
+            Debug.Log(sampleTexture.width + " x " + sampleTexture.height);
         }
     }
 

@@ -32,4 +32,8 @@ public class ErosionSettings
     [Header("Movement")]
     [Range(0f, 1f)]
     public float inertia = 0.3f;
+
+    [Header("Flow Map")]
+    public float flowStrength = 1f;
+    public float flowExponent = 1.5f;
 }
