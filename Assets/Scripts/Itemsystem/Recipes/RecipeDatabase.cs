@@ -1,20 +1,45 @@
 using System.Collections.Generic;
+using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
-public static class RecipeDatabase
+// Sammelt alle Rezepte des Spiels und beantwortet Abfragen wie
+// "Was kann ein Smelter herstellen?" oder "Wie bekomme ich Circuit Boards?".
+// Anlegen über: Create > Factory > Recipe Database
+// Befüllen: Rechtsklick auf den Komponenten-Header im Inspector > "Alle Rezepte im Projekt sammeln"
+[CreateAssetMenu(fileName = "RecipeDatabase", menuName = "Factory/Recipe Database")]
+public class RecipeDatabase : ScriptableObject
 {
-    public static Dictionary<string, Recipe> Recipes = new();
+    [SerializeField] private List<Recipe> recipes = new List<Recipe>();
 
-    public static void Register(Recipe recipe)
+    public IReadOnlyList<Recipe> Recipes => recipes;
+
+    public List<Recipe> GetRecipesFor(BuildingData building)
     {
-        Recipes[recipe.Id] = recipe;
+        return recipes.FindAll(r => r != null && r.ProducedIn == building);
     }
 
-    public static Recipe Get(string id)
+    public List<Recipe> GetRecipesProducing(ItemData item)
     {
-        return Recipes[id];
+        return recipes.FindAll(r => r != null && r.Produces(item));
     }
-}
-class Recipes
-{
-    
+
+    public List<Recipe> GetRecipesUsing(ItemData item)
+    {
+        return recipes.FindAll(r => r != null && r.Uses(item));
+    }
+
+#if UNITY_EDITOR
+    [ContextMenu("Alle Rezepte im Projekt sammeln")]
+    public void CollectAllRecipes()
+    {
+        recipes.Clear();
+        foreach (string guid in AssetDatabase.FindAssets("t:" + nameof(Recipe)))
+            recipes.Add(AssetDatabase.LoadAssetAtPath<Recipe>(AssetDatabase.GUIDToAssetPath(guid)));
+
+        recipes.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+        EditorUtility.SetDirty(this);
+    }
+#endif
 }
