@@ -5,7 +5,7 @@ using UnityEngine;
 // Test-Maschine ohne Grafik: verarbeitet ein Rezept mit eigenem Inventar und zeigt ihren Zustand im Play-Mode an.
 // Mehrere Maschinen lassen sich über "Output Target" zu einer Produktionskette verbinden.
 // Schnell anlegen über das Menü: Factory > Test-Kette in Scene erstellen
-public class DebugMachine : MonoBehaviour
+public class DebugMachine : MonoBehaviour, ITickable
 {
     public enum State
     {
@@ -41,6 +41,7 @@ public class DebugMachine : MonoBehaviour
 
     private void OnEnable()
     {
+        TickManager.Instance.Register(this);
         activeMachines.Add(this);
         activeMachines.Sort((a, b) => a.displayOrder.CompareTo(b.displayOrder));
     }
@@ -48,32 +49,9 @@ public class DebugMachine : MonoBehaviour
     private void OnDisable()
     {
         activeMachines.Remove(this);
-    }
 
-    private void Update()
-    {
-        if (recipe == null)
-        {
-            CurrentState = State.NoRecipe;
-            return;
-        }
-
-        if (!isCrafting)
-            TryStartCrafting();
-
-        if (isCrafting)
-        {
-            CurrentState = State.Working;
-            craftProgress += Time.deltaTime * speedMultiplier;
-            if (craftProgress >= recipe.CraftTime)
-            {
-                inventory.Add(recipe.Outputs);
-                isCrafting = false;
-                craftedCount++;
-            }
-        }
-
-        PushOutputs();
+        if (TickManager.Instance != null)
+            TickManager.Instance.Unregister(this);
     }
 
     private void TryStartCrafting()
@@ -185,6 +163,32 @@ public class DebugMachine : MonoBehaviour
         foreach (ItemStack stack in stacks)
             parts.Add(stack.ToString());
         return string.Join(" + ", parts);
+    }
+
+    public void Tick()
+    {
+        if (recipe == null)
+        {
+            CurrentState = State.NoRecipe;
+            return;
+        }
+
+        if (!isCrafting)
+            TryStartCrafting();
+
+        if (isCrafting)
+        {
+            CurrentState = State.Working;
+            craftProgress += TickManager.Instance.TickDuration * speedMultiplier;
+            if (craftProgress >= recipe.CraftTime)
+            {
+                inventory.Add(recipe.Outputs);
+                isCrafting = false;
+                craftedCount++;
+            }
+        }
+
+        PushOutputs();
     }
 
     private static GUIStyle richText;
