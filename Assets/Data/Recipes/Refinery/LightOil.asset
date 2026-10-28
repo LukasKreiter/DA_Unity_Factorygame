@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1b75877e8a88644caa5ae25e03c3870, type: 3}
-  m_Name: OilSeparation
+  m_Name: LightOil
   m_EditorClassIdentifier: Assembly-CSharp::Recipe
   displayName: 
   inputs:
@@ -18,8 +18,6 @@ MonoBehaviour:
     amount: 2
   outputs:
   - item: {fileID: 11400000, guid: 58ee13b0e343a1443bc079b2a699fc77, type: 2}
-    amount: 1
-  - item: {fileID: 11400000, guid: 36b4488c523a1f74e9fc43dc4938c0c5, type: 2}
     amount: 1
   craftTime: 4
   producedIn: {fileID: 11400000, guid: e5a92d677fbe2ea4690000eea1e605bd, type: 2}

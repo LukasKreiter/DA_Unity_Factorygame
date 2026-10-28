@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1b75877e8a88644caa5ae25e03c3870, type: 3}
-  m_Name: SteelIngot
+  m_Name: Battery
   m_EditorClassIdentifier: Assembly-CSharp::Recipe
   displayName: 
   inputs:
-  - item: {fileID: 11400000, guid: 113009e0248acc341a353499903feba1, type: 2}
+  - item: {fileID: 11400000, guid: 83d7d3bc3778d7c4abfb6e82cdafca13, type: 2}
     amount: 1
-  - item: {fileID: 11400000, guid: 668088b49b46bb24392fa8517843bdce, type: 2}
+  - item: {fileID: 11400000, guid: 191d8d8d84294fa40bb873e1aa6bb9b0, type: 2}
     amount: 2
   outputs:
-  - item: {fileID: 11400000, guid: b47c8ecbbdd74cb4d8c826639ea30176, type: 2}
+  - item: {fileID: 11400000, guid: 0ae75609911bb204088a710f77dd0dfb, type: 2}
     amount: 1
-  craftTime: 3
-  producedIn: {fileID: 11400000, guid: eed4b975c029ec04a8b431d804b99cf2, type: 2}
+  craftTime: 8
+  producedIn: {fileID: 11400000, guid: 02266856e939fddff39a212dff5a9a2f, type: 2}

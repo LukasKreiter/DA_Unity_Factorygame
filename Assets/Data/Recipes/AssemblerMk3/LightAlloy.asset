@@ -24,4 +24,4 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: b0ed70dea568a334d92f4b4de6bc5de6, type: 2}
     amount: 1
   craftTime: 6
-  producedIn: {fileID: 11400000, guid: 3cd5a621c83d82349a4dbc5c4a9a5f14, type: 2}
+  producedIn: {fileID: 11400000, guid: 0dd9d84c5183b1532b1edb92a94c7b7e, type: 2}

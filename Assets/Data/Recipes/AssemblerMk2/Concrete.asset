@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1b75877e8a88644caa5ae25e03c3870, type: 3}
-  m_Name: CircuitBoard
+  m_Name: Concrete
   m_EditorClassIdentifier: Assembly-CSharp::Recipe
   displayName: 
   inputs:
-  - item: {fileID: 11400000, guid: b8038efd6613d0e4b8f6e1b3e8a72063, type: 2}
-    amount: 1
-  - item: {fileID: 11400000, guid: 170ffe5a5dc039b4eb2d25c7b43792b8, type: 2}
+  - item: {fileID: 11400000, guid: 2a6ef3b126e38a74a85ed61cd43ac157, type: 2}
     amount: 2
-  outputs:
-  - item: {fileID: 11400000, guid: 4380b4eaf67f6ea4d865a78a102ae5c0, type: 2}
+  - item: {fileID: 11400000, guid: 022932bd3d61f544b83eafd5be7844c9, type: 2}
     amount: 1
-  craftTime: 6
-  producedIn: {fileID: 11400000, guid: 3cd5a621c83d82349a4dbc5c4a9a5f14, type: 2}
+  outputs:
+  - item: {fileID: 11400000, guid: 220aeb1509e71eb49b278c79a49b6a93, type: 2}
+    amount: 1
+  craftTime: 2
+  producedIn: {fileID: 11400000, guid: 02266856e939fddff39a212dff5a9a2f, type: 2}
