@@ -28,20 +28,22 @@ public class OutputPort : MonoBehaviour
         }
     }
 
-    public void PushOutput()
+    public bool PushOutput()
     {
         if (target == null) {
-            return;
+            return false;
         }
 
         if (!owner.TryPeekOutput(index, out ItemData item))
         {
-            return;
+            return false;
         }
         if (target.TryInsert(item))
         {
             owner.ConfirmOutput(index);
+            return true;
         }
+        return false;
     }
 
 }

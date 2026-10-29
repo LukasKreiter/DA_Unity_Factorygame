@@ -152,3 +152,4 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
         outputBuffer.Remove(item, 1);
     }
 }
+
