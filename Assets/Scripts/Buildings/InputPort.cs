@@ -2,14 +2,14 @@ using UnityEngine;
 
 public class InputPort : MonoBehaviour, IItemReceiver
 {
-    private ProductionBuilding building;
+    private IInputOwner owner;
 
     public bool TryInsert(ItemData item)
     {
-        return building.TryInsertInput(item);
+        return owner.TryInsertInput(item);
     }
     private void Awake()
     {
-        building = GetComponentInParent<ProductionBuilding>();
+        owner = GetComponentInParent<IInputOwner>();
     }
 }

@@ -6,13 +6,13 @@ public class OutputPort : MonoBehaviour
 
     [SerializeField] private InputPort testConnection;
 
-    private ProductionBuilding building;
+    private IOutputOwner owner;
 
     private IItemReceiver target;
 
     private void Awake()
     {
-        building = GetComponentInParent<ProductionBuilding>();
+        owner = GetComponentInParent<IOutputOwner>();
     }
 
     public void Connect(IItemReceiver receiver)
@@ -30,18 +30,17 @@ public class OutputPort : MonoBehaviour
 
     public void PushOutput()
     {
-        if (target == null || building.Recipe == null || building.Recipe.Outputs.Count < index+1) {
+        if (target == null) {
             return;
         }
-        ItemData item = building.Recipe.Outputs[index].Item;
 
-        if (building.OutputBuffer.GetAmount(item) <= 0)
+        if (!owner.TryPeekOutput(index, out ItemData item))
         {
             return;
         }
         if (target.TryInsert(item))
         {
-            building.OutputBuffer.Remove(item, 1);
+            owner.ConfirmOutput(index);
         }
     }
 

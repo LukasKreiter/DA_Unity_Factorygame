@@ -1,6 +1,7 @@
 using UnityEngine;
+using static UnityEditor.Progress;
 
-public class ProductionBuilding : MonoBehaviour, ITickable
+public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutputOwner
 {
     public enum State
     {
@@ -132,5 +133,22 @@ public class ProductionBuilding : MonoBehaviour, ITickable
         }
 
         PushOutputs();
+    }
+
+    public bool TryPeekOutput(int portIndex, out ItemData item)
+    {
+        if (recipe == null || portIndex >= recipe.Outputs.Count)
+        {
+            item = null;
+            return false;
+        }
+        item = recipe.Outputs[portIndex].Item;
+        return outputBuffer.GetAmount(item) > 0;
+    }
+
+    public void ConfirmOutput(int portIndex)
+    {
+        ItemData item = recipe.Outputs[portIndex].Item;
+        outputBuffer.Remove(item, 1);
     }
 }
