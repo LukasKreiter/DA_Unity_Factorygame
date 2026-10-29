@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: 
   inputs:
   - item: {fileID: 11400000, guid: 82cc27bc34f9ed94bb69b15dc148b560, type: 2}
-    amount: 2
+    amount: 3
   outputs:
   - item: {fileID: 11400000, guid: b8038efd6613d0e4b8f6e1b3e8a72063, type: 2}
     amount: 1

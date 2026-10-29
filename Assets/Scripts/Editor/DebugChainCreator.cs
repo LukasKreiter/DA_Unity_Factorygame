@@ -20,7 +20,7 @@ public static class DebugChainCreator
         Recipe copperOre = LoadRecipe("Miner/CopperOre");
         Recipe copperIngot = LoadRecipe("Smelter/CopperIngot");
         Recipe copperWire = LoadRecipe("Assembler/CopperWire");
-        Recipe circuitBoard = LoadRecipe("Assembler/CircuitBoard");
+        Recipe circuitBoard = LoadRecipe("AssemblerMk2/CircuitBoard");
 
         if (ironOre == null || ironIngot == null || ironPlate == null || copperOre == null
             || copperIngot == null || copperWire == null || circuitBoard == null)
@@ -33,7 +33,7 @@ public static class DebugChainCreator
         GameObject root = new GameObject("Test-Kette (Circuit Board)");
         Undo.RegisterCreatedObjectUndo(root, "Test-Kette erstellen");
 
-        DebugMachine circuitAssembler = CreateMachine(root, "Assembler: Circuit Board", circuitBoard, null, 6);
+        DebugMachine circuitAssembler = CreateMachine(root, "Assembler Mk 2: Circuit Board", circuitBoard, null, 6);
         DebugMachine plateAssembler = CreateMachine(root, "Assembler: Iron Plate", ironPlate, circuitAssembler, 2);
         DebugMachine wireAssembler = CreateMachine(root, "Assembler: Copper Wire", copperWire, circuitAssembler, 5);
         DebugMachine ironSmelter = CreateMachine(root, "Smelter: Iron Ingot", ironIngot, plateAssembler, 1);

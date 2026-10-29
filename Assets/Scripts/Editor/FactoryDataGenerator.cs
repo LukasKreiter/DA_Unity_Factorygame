@@ -21,16 +21,22 @@ public static class FactoryDataGenerator
         BuildingData waterExtractor = Building("Production", "WaterExtractor", "Water Extractor", BuildingCategory.Production, 2, 2);
         BuildingData oilExtractor = Building("Production", "OilExtractor", "Oil Extractor", BuildingCategory.Production, 3, 3);
         BuildingData smelter = Building("Production", "Smelter", "Smelter", BuildingCategory.Production, 2, 2);
+        BuildingData foundry = Building("Production", "Foundry", "Foundry", BuildingCategory.Production, 3, 3);
         BuildingData assembler = Building("Production", "Assembler", "Assembler", BuildingCategory.Production, 3, 3);
+        BuildingData assemblerMk2 = Building("Production", "AssemblerMk2", "Assembler Mk 2", BuildingCategory.Production, 3, 4);
+        BuildingData assemblerMk3 = Building("Production", "AssemblerMk3", "Assembler Mk 3", BuildingCategory.Production, 4, 4);
         BuildingData refinery = Building("Production", "Refinery", "Refinery", BuildingCategory.Production, 3, 4);
         Building("Production", "ResearchLab", "Research Lab", BuildingCategory.Production, 3, 3);
 
         Building("Energy", "WindTurbine", "Wind Turbine", BuildingCategory.Energy, 2, 2);
         Building("Energy", "SolarPowerplant", "Solar Powerplant", BuildingCategory.Energy, 3, 3);
-        Building("Energy", "CombustionPowerplant", "Coal/Fuel/Biomass Powerplant", BuildingCategory.Energy, 3, 3);
+        Building("Energy", "CoalPowerplant", "Coal Powerplant", BuildingCategory.Energy, 3, 3);
+        Building("Energy", "FuelPowerplant", "Fuel/Biomass Powerplant", BuildingCategory.Energy, 3, 3);
         Building("Energy", "NuclearPowerplant", "Nuclear Powerplant", BuildingCategory.Energy, 5, 5);
 
         Building("Logistics", "ConveyorBelt", "Conveyor Belt", BuildingCategory.Logistics, 1, 1);
+        Building("Logistics", "Splitter", "Splitter", BuildingCategory.Logistics, 1, 1);
+        Building("Logistics", "Merger", "Merger", BuildingCategory.Logistics, 1, 1);
         Building("Logistics", "PowerPole", "Power Pole", BuildingCategory.Logistics, 1, 1);
 
         // ---------- Items: Rohstoffe ----------
@@ -81,23 +87,30 @@ public static class FactoryDataGenerator
         // ---------- Rezepte: Smelter ----------
         CreateRecipe("Smelter", "IronIngot", smelter, 2f, In(S(ironOre, 1)), Out(S(ironIngot, 1)));
         CreateRecipe("Smelter", "CopperIngot", smelter, 2f, In(S(copperOre, 1)), Out(S(copperIngot, 1)));
-        CreateRecipe("Smelter", "SteelIngot", smelter, 3f, In(S(ironOre, 1), S(coal, 1)), Out(S(steelIngot, 1)));
 
-        // ---------- Rezepte: Assembler ----------
+        // ---------- Rezepte: Foundry ----------
+        CreateRecipe("Foundry", "SteelIngot", foundry, 3f, In(S(ironOre, 1), S(coal, 2)), Out(S(steelIngot, 1)));
+
+        // ---------- Rezepte: Assembler (1 Input) ----------
         CreateRecipe("Assembler", "IronGear", assembler, 2f, In(S(ironIngot, 2)), Out(S(ironGear, 1)));
         CreateRecipe("Assembler", "Screws", assembler, 1f, In(S(ironIngot, 1)), Out(S(screws, 4)));
-        CreateRecipe("Assembler", "IronPlate", assembler, 2f, In(S(ironIngot, 2)), Out(S(ironPlate, 1)));
+        CreateRecipe("Assembler", "IronPlate", assembler, 2f, In(S(ironIngot, 3)), Out(S(ironPlate, 1)));
         CreateRecipe("Assembler", "CopperWire", assembler, 1f, In(S(copperIngot, 1)), Out(S(copperWire, 2)));
-        CreateRecipe("Assembler", "Concrete", assembler, 2f, In(S(stone, 2), S(water, 1)), Out(S(concrete, 1)));
         CreateRecipe("Assembler", "Foundation", assembler, 4f, In(S(concrete, 4)), Out(S(foundation, 1)));
-        CreateRecipe("Assembler", "ReinforcedSteelPlate", assembler, 6f, In(S(steelIngot, 2), S(screws, 4)), Out(S(reinforcedSteelPlate, 1)));
-        CreateRecipe("Assembler", "CircuitBoard", assembler, 6f, In(S(ironPlate, 1), S(copperWire, 2)), Out(S(circuitBoard, 1)));
-        CreateRecipe("Assembler", "LightAlloy", assembler, 6f, In(S(ironIngot, 1), S(copperIngot, 1), S(plastic, 1)), Out(S(lightAlloy, 1)));
-        CreateRecipe("Assembler", "Battery", assembler, 8f, In(S(rubber, 1), S(sulfuricAcid, 2)), Out(S(battery, 1)));
         CreateRecipe("Assembler", "UraniumFuelRod", assembler, 10f, In(S(uraniumOre, 5)), Out(S(uraniumFuelRod, 1)));
 
+        // ---------- Rezepte: Assembler Mk 2 (2 Inputs) ----------
+        CreateRecipe("AssemblerMk2", "Concrete", assemblerMk2, 2f, In(S(stone, 2), S(water, 1)), Out(S(concrete, 1)));
+        CreateRecipe("AssemblerMk2", "ReinforcedSteelPlate", assemblerMk2, 6f, In(S(steelIngot, 2), S(screws, 4)), Out(S(reinforcedSteelPlate, 1)));
+        CreateRecipe("AssemblerMk2", "CircuitBoard", assemblerMk2, 6f, In(S(ironPlate, 1), S(copperWire, 2)), Out(S(circuitBoard, 1)));
+        CreateRecipe("AssemblerMk2", "Battery", assemblerMk2, 8f, In(S(rubber, 1), S(sulfuricAcid, 2)), Out(S(battery, 1)));
+
+        // ---------- Rezepte: Assembler Mk 3 (3 Inputs) ----------
+        CreateRecipe("AssemblerMk3", "LightAlloy", assemblerMk3, 6f, In(S(ironIngot, 3), S(copperIngot, 3), S(plastic, 3)), Out(S(lightAlloy, 1)));
+
         // ---------- Rezepte: Refinery ----------
-        CreateRecipe("Refinery", "OilSeparation", refinery, 4f, In(S(crudeOil, 2)), Out(S(lightOil, 1), S(heavyOil, 1)));
+        CreateRecipe("Refinery", "LightOil", refinery, 4f, In(S(crudeOil, 2)), Out(S(lightOil, 1)));
+        CreateRecipe("Refinery", "HeavyOil", refinery, 4f, In(S(crudeOil, 2)), Out(S(heavyOil, 1)));
         CreateRecipe("Refinery", "Plastic", refinery, 3f, In(S(lightOil, 1)), Out(S(plastic, 1)));
         CreateRecipe("Refinery", "Rubber", refinery, 3f, In(S(lightOil, 1)), Out(S(rubber, 1)));
         CreateRecipe("Refinery", "Fuel", refinery, 3f, In(S(heavyOil, 1), S(coal, 1)), Out(S(fuel, 2)));

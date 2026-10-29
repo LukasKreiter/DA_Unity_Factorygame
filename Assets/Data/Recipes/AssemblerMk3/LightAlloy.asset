@@ -10,16 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1b75877e8a88644caa5ae25e03c3870, type: 3}
-  m_Name: Battery
+  m_Name: LightAlloy
   m_EditorClassIdentifier: Assembly-CSharp::Recipe
   displayName: 
   inputs:
-  - item: {fileID: 11400000, guid: 83d7d3bc3778d7c4abfb6e82cdafca13, type: 2}
+  - item: {fileID: 11400000, guid: 82cc27bc34f9ed94bb69b15dc148b560, type: 2}
+    amount: 3
+  - item: {fileID: 11400000, guid: 0de80f97099177c4d99c31a538ba7498, type: 2}
+    amount: 3
+  - item: {fileID: 11400000, guid: 5f40402b8ccfc9a4eb1e99015b804253, type: 2}
     amount: 1
-  - item: {fileID: 11400000, guid: 191d8d8d84294fa40bb873e1aa6bb9b0, type: 2}
-    amount: 2
   outputs:
-  - item: {fileID: 11400000, guid: 0ae75609911bb204088a710f77dd0dfb, type: 2}
+  - item: {fileID: 11400000, guid: b0ed70dea568a334d92f4b4de6bc5de6, type: 2}
     amount: 1
-  craftTime: 8
-  producedIn: {fileID: 11400000, guid: 3cd5a621c83d82349a4dbc5c4a9a5f14, type: 2}
+  craftTime: 6
+  producedIn: {fileID: 11400000, guid: 0dd9d84c5183b1532b1edb92a94c7b7e, type: 2}

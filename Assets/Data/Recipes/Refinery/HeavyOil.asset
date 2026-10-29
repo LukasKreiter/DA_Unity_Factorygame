@@ -10,16 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1b75877e8a88644caa5ae25e03c3870, type: 3}
-  m_Name: ReinforcedSteelPlate
+  m_Name: HeavyOil
   m_EditorClassIdentifier: Assembly-CSharp::Recipe
   displayName: 
   inputs:
-  - item: {fileID: 11400000, guid: b47c8ecbbdd74cb4d8c826639ea30176, type: 2}
+  - item: {fileID: 11400000, guid: bcd81569c111fbf4ba82d627a1b13115, type: 2}
     amount: 2
-  - item: {fileID: 11400000, guid: 4972aa9230256004797b1828e37a8f27, type: 2}
-    amount: 4
   outputs:
-  - item: {fileID: 11400000, guid: 611c5ba2866f6b54784e8803afad6973, type: 2}
+  - item: {fileID: 11400000, guid: 36b4488c523a1f74e9fc43dc4938c0c5, type: 2}
     amount: 1
-  craftTime: 6
-  producedIn: {fileID: 11400000, guid: 3cd5a621c83d82349a4dbc5c4a9a5f14, type: 2}
+  craftTime: 4
+  producedIn: {fileID: 11400000, guid: e5a92d677fbe2ea4690000eea1e605bd, type: 2}

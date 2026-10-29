@@ -13,6 +13,11 @@ public class Inventory
         return item != null && amounts.TryGetValue(item, out int amount) ? amount : 0;
     }
 
+    public void Clear()
+    {
+        amounts.Clear();
+    }
+
     public void Add(ItemData item, int amount)
     {
         if (item == null || amount <= 0)
