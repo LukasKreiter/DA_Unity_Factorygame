@@ -44,7 +44,7 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
             TickManager.Instance.Unregister(this);
     }
 
-    public bool TryInsertInput(ItemData item)
+    public bool TryInsertInput(ItemData item, int portIndex)
     {
         if (recipe == null)
         {

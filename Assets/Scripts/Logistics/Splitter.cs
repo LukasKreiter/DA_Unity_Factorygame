@@ -25,7 +25,7 @@ public class Splitter : MonoBehaviour, ITickable, IInputOwner, IOutputOwner
             TickManager.Instance.Unregister(this);
     }
 
-    public bool TryInsertInput(ItemData item)
+    public bool TryInsertInput(ItemData item, int portIndex)
     {
         if (buffer.Count >= bufferSize) {
             return false;
