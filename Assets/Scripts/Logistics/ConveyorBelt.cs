@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(LineRenderer))]
 public class ConveyorBelt : MonoBehaviour, IItemReceiver, ITickable
 {
     [SerializeField][Min(0.1f)] private float length = 5f;
@@ -9,8 +10,15 @@ public class ConveyorBelt : MonoBehaviour, IItemReceiver, ITickable
     [SerializeField] private OutputPort from;
     [SerializeField] private InputPort to;
 
-    private List<BeltItem> items = new List<BeltItem>();
     private IItemReceiver target;
+    private LineRenderer lineRenderer;
+
+    private List<BeltItem> items = new List<BeltItem>();
+
+    public Vector3 StartPoint => from.transform.position;
+    public Vector3 EndPoint => to.transform.position;
+    public float Length => length;
+    public IReadOnlyList<BeltItem> Items => items;
 
     private void OnEnable()
     {
@@ -23,6 +31,11 @@ public class ConveyorBelt : MonoBehaviour, IItemReceiver, ITickable
             TickManager.Instance.Unregister(this);
     }
 
+    private void Awake()
+    {
+        lineRenderer = GetComponent<LineRenderer>();
+    }
+
     private void Start()
     {
         if (from != null)
@@ -32,6 +45,14 @@ public class ConveyorBelt : MonoBehaviour, IItemReceiver, ITickable
         if (to != null)
         {
             Connect(to);
+        }
+        if (from != null && to != null)
+        {
+            length = Vector3.Distance(from.transform.position, to.transform.position);
+
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPosition(0, from.transform.position);
+            lineRenderer.SetPosition(1, to.transform.position);
         }
     }
 
