@@ -17,22 +17,23 @@ public static class FactoryDataGenerator
     public static void Generate()
     {
         // ---------- Gebäude ----------
-        BuildingData miner = Building("Production", "Miner", "Miner", BuildingCategory.Production, 2, 2);
-        BuildingData waterExtractor = Building("Production", "WaterExtractor", "Water Extractor", BuildingCategory.Production, 2, 2);
-        BuildingData oilExtractor = Building("Production", "OilExtractor", "Oil Extractor", BuildingCategory.Production, 3, 3);
-        BuildingData smelter = Building("Production", "Smelter", "Smelter", BuildingCategory.Production, 2, 2);
-        BuildingData foundry = Building("Production", "Foundry", "Foundry", BuildingCategory.Production, 3, 3);
-        BuildingData assembler = Building("Production", "Assembler", "Assembler", BuildingCategory.Production, 3, 3);
-        BuildingData assemblerMk2 = Building("Production", "AssemblerMk2", "Assembler Mk 2", BuildingCategory.Production, 3, 4);
-        BuildingData assemblerMk3 = Building("Production", "AssemblerMk3", "Assembler Mk 3", BuildingCategory.Production, 4, 4);
-        BuildingData refinery = Building("Production", "Refinery", "Refinery", BuildingCategory.Production, 3, 4);
-        Building("Production", "ResearchLab", "Research Lab", BuildingCategory.Production, 3, 3);
+        // Stromwerte in MW: consumption = Verbrauch beim Arbeiten, production = Leistung im Betrieb
+        BuildingData miner = Building("Production", "Miner", "Miner", BuildingCategory.Production, 2, 2, consumption: 5f);
+        BuildingData waterExtractor = Building("Production", "WaterExtractor", "Water Extractor", BuildingCategory.Production, 2, 2, consumption: 20f);
+        BuildingData oilExtractor = Building("Production", "OilExtractor", "Oil Extractor", BuildingCategory.Production, 3, 3, consumption: 40f);
+        BuildingData smelter = Building("Production", "Smelter", "Smelter", BuildingCategory.Production, 2, 2, consumption: 4f);
+        BuildingData foundry = Building("Production", "Foundry", "Foundry", BuildingCategory.Production, 3, 3, consumption: 16f);
+        BuildingData assembler = Building("Production", "Assembler", "Assembler", BuildingCategory.Production, 3, 3, consumption: 15f);
+        BuildingData assemblerMk2 = Building("Production", "AssemblerMk2", "Assembler Mk 2", BuildingCategory.Production, 3, 4, consumption: 25f);
+        BuildingData assemblerMk3 = Building("Production", "AssemblerMk3", "Assembler Mk 3", BuildingCategory.Production, 4, 4, consumption: 40f);
+        BuildingData refinery = Building("Production", "Refinery", "Refinery", BuildingCategory.Production, 3, 4, consumption: 30f);
+        Building("Production", "ResearchLab", "Research Lab", BuildingCategory.Production, 3, 3, consumption: 10f);
 
-        Building("Energy", "WindTurbine", "Wind Turbine", BuildingCategory.Energy, 2, 2);
-        Building("Energy", "SolarPowerplant", "Solar Powerplant", BuildingCategory.Energy, 3, 3);
-        Building("Energy", "CoalPowerplant", "Coal Powerplant", BuildingCategory.Energy, 3, 3);
-        Building("Energy", "FuelPowerplant", "Fuel/Biomass Powerplant", BuildingCategory.Energy, 3, 3);
-        Building("Energy", "NuclearPowerplant", "Nuclear Powerplant", BuildingCategory.Energy, 5, 5);
+        Building("Energy", "WindTurbine", "Wind Turbine", BuildingCategory.Energy, 2, 2, production: 10f);
+        Building("Energy", "SolarPowerplant", "Solar Powerplant", BuildingCategory.Energy, 3, 3, production: 15f);
+        BuildingData coalPowerplant = Building("Energy", "CoalPowerplant", "Coal Powerplant", BuildingCategory.Energy, 3, 3, production: 75f);
+        BuildingData fuelPowerplant = Building("Energy", "FuelPowerplant", "Fuel/Biomass Powerplant", BuildingCategory.Energy, 3, 3, production: 150f);
+        BuildingData nuclearPowerplant = Building("Energy", "NuclearPowerplant", "Nuclear Powerplant", BuildingCategory.Energy, 5, 5, production: 1000f);
 
         Building("Logistics", "ConveyorBelt", "Conveyor Belt", BuildingCategory.Logistics, 1, 1);
         Building("Logistics", "Splitter", "Splitter", BuildingCategory.Logistics, 1, 1);
@@ -43,7 +44,7 @@ public static class FactoryDataGenerator
         ItemData ironOre = Item("Raw", "IronOre", "Iron Ore");
         ItemData copperOre = Item("Raw", "CopperOre", "Copper Ore");
         ItemData stone = Item("Raw", "Stone", "Stone");
-        Item("Raw", "Wood", "Wood");
+        ItemData wood = Item("Raw", "Wood", "Wood");
         ItemData water = Item("Raw", "Water", "Water", ItemForm.Fluid);
         ItemData crudeOil = Item("Raw", "CrudeOil", "Crude Oil", ItemForm.Fluid);
         ItemData coal = Item("Raw", "Coal", "Coal");
@@ -116,6 +117,12 @@ public static class FactoryDataGenerator
         CreateRecipe("Refinery", "Fuel", refinery, 3f, In(S(heavyOil, 1), S(coal, 1)), Out(S(fuel, 2)));
         CreateRecipe("Refinery", "SulfuricAcid", refinery, 3f, In(S(sulfur, 1), S(water, 1)), Out(S(sulfuricAcid, 1)));
 
+        // ---------- Rezepte: Kraftwerke (keine Outputs, craftTime = Brenndauer eines Satzes) ----------
+        CreateRecipe("CoalPowerplant", "CoalPower", coalPowerplant, 4f, In(S(coal, 1), S(water, 2)), Out());
+        CreateRecipe("FuelPowerplant", "FuelPower", fuelPowerplant, 6f, In(S(fuel, 1)), Out());
+        CreateRecipe("FuelPowerplant", "BiomassPower", fuelPowerplant, 3f, In(S(wood, 1)), Out());
+        CreateRecipe("NuclearPowerplant", "NuclearPower", nuclearPowerplant, 60f, In(S(uraniumFuelRod, 1)), Out());
+
         // ---------- Datenbanken ----------
         ItemDatabase itemDatabase = LoadOrCreate<ItemDatabase>(Root, "ItemDatabase", so => { });
         itemDatabase.CollectAllItems();
@@ -135,13 +142,16 @@ public static class FactoryDataGenerator
         });
     }
 
-    private static BuildingData Building(string group, string id, string displayName, BuildingCategory category, int width, int depth)
+    private static BuildingData Building(string group, string id, string displayName, BuildingCategory category, int width, int depth,
+        float consumption = 0f, float production = 0f)
     {
         return LoadOrCreate<BuildingData>($"{BuildingsPath}/{group}", id, so =>
         {
             so.FindProperty("displayName").stringValue = displayName;
             so.FindProperty("category").enumValueIndex = (int)category;
             so.FindProperty("size").vector2IntValue = new Vector2Int(width, depth);
+            so.FindProperty("powerConsumption").floatValue = consumption;
+            so.FindProperty("powerProduction").floatValue = production;
         });
     }
 

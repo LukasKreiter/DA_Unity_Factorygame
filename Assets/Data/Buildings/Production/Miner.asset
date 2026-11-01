@@ -18,6 +18,6 @@ MonoBehaviour:
   category: 0
   size: {x: 2, y: 2}
   prefab: {fileID: 0}
-  powerConsumption: 0
+  powerConsumption: 5
   powerProduction: 0
   buildCost: []

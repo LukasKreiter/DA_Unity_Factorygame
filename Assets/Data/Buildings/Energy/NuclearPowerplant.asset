@@ -19,5 +19,5 @@ MonoBehaviour:
   size: {x: 5, y: 5}
   prefab: {fileID: 0}
   powerConsumption: 0
-  powerProduction: 0
+  powerProduction: 1000
   buildCost: []

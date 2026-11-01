@@ -4,6 +4,7 @@ using UnityEngine;
 // Ein Rezept: wandelt Inputs in einem bestimmten Gebäude in Outputs um.
 // Anlegen im Project-Fenster über: Create > Factory > Recipe
 // Rezepte ohne Inputs sind erlaubt (z. B. Miner: nichts -> Iron Ore).
+// Rezepte ohne Outputs sind für Kraftwerke erlaubt (z. B. Coal Powerplant: Coal + Water -> Strom).
 [CreateAssetMenu(fileName = "NewRecipe", menuName = "Factory/Recipe")]
 public class Recipe : ScriptableObject
 {
@@ -43,7 +44,8 @@ public class Recipe : ScriptableObject
 
     private void OnValidate()
     {
-        if (outputs.Count == 0)
+        bool isFuelRecipe = producedIn != null && producedIn.Category == BuildingCategory.Energy;
+        if (outputs.Count == 0 && !isFuelRecipe)
             Debug.LogWarning($"Rezept '{name}' hat keine Outputs.", this);
         if (producedIn == null)
             Debug.LogWarning($"Rezept '{name}' ist keinem Gebäude zugeordnet.", this);
