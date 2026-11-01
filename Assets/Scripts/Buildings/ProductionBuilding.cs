@@ -1,11 +1,11 @@
 using UnityEngine;
-using static UnityEditor.Progress;
 
-public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutputOwner
+public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutputOwner, IPowerConsumer
 {
     public enum State
     {
         NoRecipe,
+        NoPower,
         WaitingForInputs,
         Working,
         OutputFull,
@@ -27,6 +27,14 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
     public Inventory InputBuffer => inputBuffer;
     public Inventory OutputBuffer => outputBuffer;
     public Recipe Recipe => recipe;
+    bool HasPower => !NeedsPower || satisfaction > 0;
+
+    private float satisfaction = 1f;
+ 
+
+    [SerializeField] private BuildingData buildingData;
+    public bool NeedsPower => buildingData != null && buildingData.PowerConsumption > 0;
+    public float CurrentDemand => isCrafting && NeedsPower ? buildingData.PowerConsumption : 0;
 
     private void Awake()
     {
@@ -36,12 +44,17 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
     private void OnEnable()
     {
         TickManager.Instance.Register(this);
+        if (PowerGrid.Instance != null) 
+        {
+            PowerGrid.Instance.Register(this);
+            satisfaction = 0;
+        }
     }
 
     private void OnDisable()
     {
-        if (TickManager.Instance != null)
-            TickManager.Instance.Unregister(this);
+        if (TickManager.Instance != null) TickManager.Instance.Unregister(this);
+        if (PowerGrid.Instance != null) PowerGrid.Instance.Unregister(this);
     }
 
     public bool TryInsertInput(ItemData item, int portIndex)
@@ -55,6 +68,10 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
             return false;
         }
         if (inputBuffer.GetAmount(item) >= item.MaxStackSize)
+        {
+            return false;
+        }
+        if (!HasPower)
         {
             return false;
         }
@@ -74,6 +91,11 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
             CurrentState = State.OutputFull;
             return;
         }
+        if (!HasPower)
+        {
+            CurrentState = State.NoPower;
+            return;
+        }
 
         InputBuffer.Remove(recipe.Inputs);
         isCrafting = true;
@@ -89,6 +111,7 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
         }
         return true;
     }
+
 
     public void SetRecipe(Recipe recipe)
     {
@@ -109,7 +132,7 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
     }
 
     public void Tick()
-    {
+    {      
         if (recipe == null)
         {
             CurrentState = State.NoRecipe;
@@ -121,8 +144,9 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
 
         if (isCrafting)
         {
+            float powerFactor = NeedsPower ? satisfaction : 1;
             CurrentState = State.Working;
-            craftProgress += TickManager.Instance.TickDuration * speedMultiplier;
+            craftProgress += TickManager.Instance.TickDuration * speedMultiplier * powerFactor;
             if (craftProgress >= recipe.CraftTime)
             {
                 OutputBuffer.Add(recipe.Outputs);
@@ -150,6 +174,11 @@ public class ProductionBuilding : MonoBehaviour, ITickable, IInputOwner, IOutput
     {
         ItemData item = recipe.Outputs[portIndex].Item;
         outputBuffer.Remove(item, 1);
+    }
+
+    public void SetSatisfaction(float value)
+    {
+        satisfaction = value;
     }
 }
 
